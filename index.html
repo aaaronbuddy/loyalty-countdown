@@ -159,7 +159,17 @@
 </head>
 <body>
 
-<div class="tv">
+<!-- ── Password Protection Overlay ── -->
+<div id="pwd-overlay" style="position:fixed;inset:0;background:#0a0a1a;display:flex;align-items:center;justify-content:center;z-index:9999;">
+  <div style="text-align:center;padding:2rem;">
+    <div style="font-size:clamp(1.2rem,3vh,2rem);color:#ffd93d;margin-bottom:1.5rem;">🔒 請輸入密碼</div>
+    <input id="pwd-input" type="password" placeholder="Password" style="padding:10px 16px;font-size:1rem;border-radius:8px;border:1px solid #444;background:#161b22;color:#fff;width:220px;text-align:center;" onkeydown="if(event.key==='Enter')checkPwd()">
+    <button onclick="checkPwd()" style="margin-left:8px;padding:10px 18px;font-size:1rem;border-radius:8px;border:none;background:#ffd93d;color:#000;cursor:pointer;">確定</button>
+    <div id="pwd-err" style="color:#f85149;margin-top:10px;font-size:0.85rem;display:none;">密碼錯誤，請重試</div>
+  </div>
+</div>
+
+<div class="tv" id="main-content" style="display:none;">
   <div class="hdr">
     <h1>🚀 新 Loyalty 上線倒數！！</h1>
   </div>
@@ -190,13 +200,34 @@
 </div>
 
 <script>
-  // ── Countdown ──
+  // ── Password Protection ──
+  const PWD = 'ctf2026'; // 密碼：ctf2026
+  function checkPwd(){
+    const inp=document.getElementById('pwd-input'), err=document.getElementById('pwd-err');
+    if(inp.value===PWD){
+      document.getElementById('pwd-overlay').style.display='none';
+      document.getElementById('main-content').style.display='flex';
+      // Start countdown after password verified
+      startCountdown();
+    } else {
+      err.style.display='block';
+      inp.value=''; inp.focus();
+    }
+  }
+
+  // ── Countdown (starts after pwd) ──
+  let countdownStarted = false;
+  function startCountdown(){
+    if(countdownStarted) return;
+    countdownStarted = true;
+    tick();
+  }
   const TGT = new Date('2026-09-02T00:00:00+08:00');
   const $d=document.getElementById('days'), $h=document.getElementById('hours'),
         $m=document.getElementById('mins'), $s=document.getElementById('secs'),
         $f=document.getElementById('ftr-text');
 
-  (function tick(){
+  function tick(){
     const diff=TGT-new Date();
     if(diff<=0){$d.textContent='0';$h.textContent='00';$m.textContent='00';$s.textContent='00';$f.textContent='已上線！🎉';return}
     const d=Math.floor(diff/864e5),h=Math.floor(diff/36e5)%24,
@@ -204,7 +235,7 @@
     $d.textContent=d;$h.textContent=String(h).padStart(2,'0');
     $m.textContent=String(mn).padStart(2,'0');$s.textContent=String(sc).padStart(2,'0');
     setTimeout(tick,1000);
-  })();
+  }
 
   // ── Image Upload ──
   document.getElementById('img-upload').addEventListener('change', function(e){
